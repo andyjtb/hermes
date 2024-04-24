@@ -289,6 +289,14 @@ class RuntimeDecorator : public Base, private jsi::Instrumentation {
     plain_.setPropertyValue(o, name, value);
   };
 
+  void deleteProperty(const Object& o, const String& name) override {
+    plain_.deleteProperty(o, name);
+  };
+
+  void deleteProperty(const Object& o, const PropNameID& name) override {
+    plain_.deleteProperty(o, name);
+  };
+
   bool isArray(const Object& o) const override {
     return plain_.isArray(o);
   };
@@ -330,6 +338,9 @@ class RuntimeDecorator : public Base, private jsi::Instrumentation {
   };
   uint8_t* data(const ArrayBuffer& ab) override {
     return plain_.data(ab);
+  };
+  void setLength(const Array& a, size_t i) override {
+    return plain_.setLength(a, i);
   };
   Value getValueAtIndex(const Array& a, size_t i) override {
     return plain_.getValueAtIndex(a, i);

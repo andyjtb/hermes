@@ -652,6 +652,9 @@ class HermesRuntimeImpl final : public HermesRuntime,
       const jsi::Object &,
       const jsi::String &name,
       const jsi::Value &value) override;
+  void deleteProperty(const jsi::Object&, const jsi::String& name) override;
+  void deleteProperty(const jsi::Object&, const jsi::PropNameID& name)
+      override;
   bool isArray(const jsi::Object &) const override;
   bool isArrayBuffer(const jsi::Object &) const override;
   bool isFunction(const jsi::Object &) const override;
@@ -668,6 +671,7 @@ class HermesRuntimeImpl final : public HermesRuntime,
   size_t size(const jsi::Array &) override;
   size_t size(const jsi::ArrayBuffer &) override;
   uint8_t *data(const jsi::ArrayBuffer &) override;
+  void setLength(const jsi::Array& a, size_t i) override;
   jsi::Value getValueAtIndex(const jsi::Array &, size_t i) override;
   void setValueAtIndexImpl(
       const jsi::Array &,
@@ -2067,6 +2071,30 @@ void HermesRuntimeImpl::setPropertyValue(
                   .getStatus());
 }
 
+void HermesRuntimeImpl::deleteProperty(
+    const jsi::Object& obj,
+    const jsi::String& name) {
+  vm::GCScope gcScope(runtime_);
+  auto h = handle(obj);
+  checkStatus(h->deleteComputed(
+                   h,
+                   runtime_,
+                   stringHandle(name),
+                   vm::PropOpFlags().plusThrowOnError())
+                  .getStatus());
+}
+
+void HermesRuntimeImpl::deleteProperty(
+    const jsi::Object& obj,
+    const jsi::PropNameID& name) {
+  vm::GCScope gcScope(runtime_);
+  auto h = handle(obj);
+  vm::SymbolID nameID = phv(name).getSymbol();
+  checkStatus(
+      h->deleteNamed(h, runtime_, nameID, vm::PropOpFlags().plusThrowOnError())
+          .getStatus());
+}
+
 void HermesRuntimeImpl::setPropertyValue(
     const jsi::Object &obj,
     const jsi::PropNameID &name,
@@ -2187,6 +2215,15 @@ uint8_t *HermesRuntimeImpl::data(const jsi::ArrayBuffer &arr) {
   if (LLVM_UNLIKELY(!ab->attached()))
     throw jsi::JSINativeException("ArrayBuffer is detached.");
   return ab->getDataBlock(runtime_);
+}
+
+void HermesRuntimeImpl::setLength(const jsi::Array& arr, size_t i) {
+  vm::GCScope gcScope(runtime_);
+  auto res = vm::JSArray::setLengthProperty(
+      arrayHandle(arr),
+      runtime_,
+      i);
+  checkStatus(res.getStatus());
 }
 
 jsi::Value HermesRuntimeImpl::getValueAtIndex(const jsi::Array &arr, size_t i) {
