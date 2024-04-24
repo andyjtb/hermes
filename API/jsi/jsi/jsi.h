@@ -349,6 +349,8 @@ class JSI_EXPORT Runtime {
       const Value& value) = 0;
   virtual void
   setPropertyValue(const Object&, const String& name, const Value& value) = 0;
+  virtual void deleteProperty(const Object&, const String& name) = 0;
+  virtual void deleteProperty(const Object&, const PropNameID& name) = 0;
 
   virtual bool isArray(const Object&) const = 0;
   virtual bool isArrayBuffer(const Object&) const = 0;
@@ -366,6 +368,7 @@ class JSI_EXPORT Runtime {
   virtual size_t size(const Array&) = 0;
   virtual size_t size(const ArrayBuffer&) = 0;
   virtual uint8_t* data(const ArrayBuffer&) = 0;
+  virtual void setLength(const Array&, size_t i) = 0;
   virtual Value getValueAtIndex(const Array&, size_t i) = 0;
   virtual void
   setValueAtIndexImpl(const Array&, size_t i, const Value& value) = 0;
@@ -725,6 +728,15 @@ class JSI_EXPORT Object : public Pointer {
   /// given PropNameID name.
   bool hasProperty(Runtime& runtime, const PropNameID& name) const;
 
+  ///
+  void deleteProperty(Runtime& runtime, const char* name) const;
+
+  ///
+  void deleteProperty(Runtime& runtime, const String& name) const;
+
+  ///
+  void deleteProperty(Runtime& runtime, const PropNameID& name) const;
+
   /// Sets the property value from a Value or anything which can be
   /// used to make one: nullptr_t, bool, double, int, const char*,
   /// String, or Object.
@@ -944,8 +956,7 @@ class JSI_EXPORT Array : public Object {
   template <typename T>
   void setValueAtIndex(Runtime& runtime, size_t i, T&& value) const;
 
-  /// There is no current API for changing the size of an array once
-  /// created.  We'll probably need that eventually.
+  void setLength(Runtime& runtime, size_t i) const;
 
   /// Creates a new Array instance from provided values
   template <typename... Args>

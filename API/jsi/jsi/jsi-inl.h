@@ -110,6 +110,19 @@ inline bool Object::hasProperty(Runtime& runtime, const PropNameID& name)
   return runtime.hasProperty(*this, name);
 }
 
+inline void Object::deleteProperty(Runtime& runtime, const char* name) const {
+  hasProperty(runtime, String::createFromAscii(runtime, name));
+}
+
+inline void Object::deleteProperty(Runtime& runtime, const String& name) const {
+  runtime.deleteProperty(*this, name);
+}
+
+inline void Object::deleteProperty(Runtime& runtime, const PropNameID& name)
+    const {
+  runtime.deleteProperty(*this, name);
+}
+
 template <typename T>
 void Object::setProperty(Runtime& runtime, const char* name, T&& value) const {
   setProperty(
@@ -244,6 +257,10 @@ template <typename T>
 void Array::setValueAtIndex(Runtime& runtime, size_t i, T&& value) const {
   setValueAtIndexImpl(
       runtime, i, detail::toValue(runtime, std::forward<T>(value)));
+}
+
+inline void Array::setLength(Runtime& runtime, size_t i) const {
+  return runtime.setLength(*this, i);
 }
 
 inline Value Array::getValueAtIndex(Runtime& runtime, size_t i) const {
