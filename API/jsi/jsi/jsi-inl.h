@@ -249,6 +249,10 @@ inline Array Object::getPropertyNames(Runtime& runtime) const {
   return runtime.getPropertyNames(*this);
 }
 
+inline void Object::setToStringTag(Runtime& runtime, const jsi::String& tag) const {
+  runtime.setToStringTag(*this, tag);
+}
+
 inline Value WeakObject::lock(Runtime& runtime) const {
   return runtime.lockWeakObject(*this);
 }

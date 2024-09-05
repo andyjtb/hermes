@@ -662,6 +662,8 @@ class HermesRuntimeImpl final : public HermesRuntime,
   bool isHostFunction(const jsi::Function &) const override;
   jsi::Array getPropertyNames(const jsi::Object &) override;
 
+  void setToStringTag(const jsi::Object&, const jsi::String& tag) override;
+
   jsi::WeakObject createWeakObject(const jsi::Object &) override;
   jsi::Value lockWeakObject(const jsi::WeakObject &) override;
 
@@ -2107,6 +2109,28 @@ void HermesRuntimeImpl::setPropertyValue(
                    runtime_,
                    nameID,
                    vmHandleFromValue(value),
+                   vm::PropOpFlags().plusThrowOnError())
+                  .getStatus());
+}
+
+void HermesRuntimeImpl::setToStringTag(
+    const jsi::Object &obj,
+    const jsi::String &tag) {
+  vm::GCScope gcScope(runtime_);
+
+  auto dpf = vm::DefinePropertyFlags::getDefaultNewPropertyFlags();
+  dpf.writable = 0;
+  dpf.enumerable = 0;
+
+  auto h = handle(obj);
+
+  vm::SymbolID toTagID = vm::Predefined::getSymbolID(vm::Predefined::SymbolToStringTag);
+  checkStatus(h->defineOwnProperty(
+                   h,
+                   runtime_,
+                   toTagID,
+                   dpf,
+                   stringHandle(tag),
                    vm::PropOpFlags().plusThrowOnError())
                   .getStatus());
 }

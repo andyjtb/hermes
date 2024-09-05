@@ -319,6 +319,9 @@ class RuntimeDecorator : public Base, private jsi::Instrumentation {
   WeakObject createWeakObject(const Object& o) override {
     return plain_.createWeakObject(o);
   };
+  void setToStringTag(const Object& o, const String& tag) override {
+    plain_.setToStringTag(o, tag);
+  };
   Value lockWeakObject(const WeakObject& wo) override {
     return plain_.lockWeakObject(wo);
   };
