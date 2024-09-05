@@ -373,6 +373,8 @@ class JSI_EXPORT Runtime {
   virtual void
   setValueAtIndexImpl(const Array&, size_t i, const Value& value) = 0;
 
+  virtual void setToStringTag(const Object&, const String& tag) = 0;
+
   virtual Function createFunctionFromHostFunction(
       const PropNameID& name,
       unsigned int paramCount,
@@ -736,6 +738,8 @@ class JSI_EXPORT Object : public Pointer {
 
   ///
   void deleteProperty(Runtime& runtime, const PropNameID& name) const;
+
+  void setToStringTag(Runtime&, const String& tag) const;
 
   /// Sets the property value from a Value or anything which can be
   /// used to make one: nullptr_t, bool, double, int, const char*,
